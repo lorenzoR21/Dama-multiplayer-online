@@ -1,0 +1,35 @@
+services:
+   mysql:
+    build: ./mysql/
+    restart: always
+    volumes:
+      - my-datavolume:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: 'db'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - '3306:3306'
+   web:
+        build: .
+        command: sh -c "sleep 50s; python3 ./app.py"
+        container_name: web
+        ports:
+            - "5000:5000"
+        volumes:
+            - .:/code
+            - ./app.py:/code/app.py
+        depends_on:
+            - mysql
+   rabbitmq:
+    image: rabbitmq:3.9.4-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./data:/var/ib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=myuser
+      - RABBITMQ_DEFAULT_PASS=mypassword
+
+volumes:
+  my-datavolume:
